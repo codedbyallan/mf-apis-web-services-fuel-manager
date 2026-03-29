@@ -30,7 +30,7 @@ namespace mf_apis_web_services_fuel_manager.Controllers
             }
             _context.Veiculos.Add(model);
             await _context.SaveChangesAsync();
-            return CreatedAtAction("GetById", new {id = model.Id}, model);
+            return CreatedAtAction("GetById", new { id = model.Id }, model);
         }
 
         [HttpGet("{id}")]
@@ -38,14 +38,15 @@ namespace mf_apis_web_services_fuel_manager.Controllers
         {
             var model = await _context.Veiculos
                 .Include(t => t.Consumos)
-                .FirstOrDefaultAsync(c =>  c.Id == id);
-            if (model == null) 
+                .FirstOrDefaultAsync(c => c.Id == id);
+            if (model == null)
                 return NotFound();
+            GerarLinks(model);
             return Ok(model);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> Update (int id, Veiculo model)
+        public async Task<ActionResult> Update(int id, Veiculo model)
         {
             if (id != model.Id)
                 return BadRequest();
@@ -68,6 +69,13 @@ namespace mf_apis_web_services_fuel_manager.Controllers
             _context.Veiculos.Remove(model);
             await _context.SaveChangesAsync();
             return NoContent();
+        }
+
+        private void GerarLinks(Veiculo model)
+        {
+            model.Links.Add(new LinkDto(model.Id,Url.ActionLink() , rel: "self", metodo: "GET"));
+            model.Links.Add(new LinkDto(model.Id,Url.ActionLink() , rel: "update", metodo: "PUT"));
+            model.Links.Add(new LinkDto(model.Id,Url.ActionLink() , rel: "delete", metodo: "DELETE"));
         }
 
     }
